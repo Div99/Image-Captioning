@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Datasets
+Flickr*/*
+models/*
+
+# Don't ignore README
+!Flickr/README.md
+!models/README.md

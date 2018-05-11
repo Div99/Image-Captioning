@@ -1,6 +1,7 @@
 h5py
 Keras
 numpy
+pydot
 Pillow
 tensorflow
 progressbar2

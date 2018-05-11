@@ -17,10 +17,6 @@ def train_model(weight = None, epochs = 10):
   max_length = gen.max_length(train_descriptions)
   print('Description Length: %d' % max_length)
 
-  # prepare sequences
-  X1test, X2test, ytest = gen.create_sequences(tokenizer, max_length,
-                              test_descriptions, test_features)
-
   # generate model
   model = gen.define_model(vocab_size, max_length)
 
@@ -34,11 +30,14 @@ def train_model(weight = None, epochs = 10):
                 save_best_only=True, mode='min')
 
   steps = len(train_descriptions)
+  val_steps = len(test_descriptions)
   # create the data generator
-  generator = gen.data_generator(train_descriptions, train_features, tokenizer, max_length)
+  train_generator = gen.data_generator(train_descriptions, train_features, tokenizer, max_length)
+  val_generator = gen.data_generator(test_descriptions, test_features, tokenizer, max_length)
+
   # fit model
-  model.fit_generator(generator, epochs=epochs, steps_per_epoch=steps, verbose=2,
-        callbacks=[checkpoint], validation_data=([X1test, X2test], ytest))
+  model.fit_generator(train_generator, epochs=epochs, steps_per_epoch=steps, verbose=2,
+        callbacks=[checkpoint], validation_data=val_generator, validation_steps=val_steps)
 
   try:
       model.save('models/wholeModel.h5', overwrite=True)

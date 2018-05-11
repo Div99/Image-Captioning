@@ -35,6 +35,8 @@ def max_length(descriptions):
 
 # create sequences of images, input sequences and output words for an image
 def create_sequences(tokenizer, max_length, desc_list, photo):
+  vocab_size = len(tokenizer.word_index) + 1
+
   X1, X2, y = list(), list(), list()
   # walk through each description for the image
   for desc in desc_list:

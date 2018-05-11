@@ -23,8 +23,11 @@ def extract_features(directory):
   print(model.summary())
   # extract features from each photo
   features = dict()
-  for name in progressbar(listdir(directory)):
 
+  for name in progressbar(listdir(directory)):
+    # ignore README
+    if name == 'README.md':
+      continue
     filename = directory + '/' + name
     image = load_image(filename)
     # extract features

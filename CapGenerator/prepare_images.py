@@ -7,6 +7,7 @@ from keras.applications.vgg16 import preprocess_input
 from keras.layers import Input
 import numpy as np
 from progressbar import progressbar
+from keras.models import Model
 
 # load an image from filepath
 def load_image(path):

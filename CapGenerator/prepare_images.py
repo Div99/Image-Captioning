@@ -19,7 +19,10 @@ def load_image(path):
 # extract features from each photo in the directory
 def extract_features(directory):
   # load the model
-  model = VGG16(weights='imagenet', include_top=False, input_shape = (224, 224, 3))
+  model = VGG16()
+  # re-structure the model
+  model.layers.pop()
+  model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
   print(model.summary())
   # extract features from each photo
   features = dict()

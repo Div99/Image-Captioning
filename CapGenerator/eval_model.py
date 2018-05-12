@@ -101,7 +101,7 @@ if __name__ == '__main__':
   # pre-define the max sequence length (from training)
   max_length = 34
   # load the model
-  filename = 'models/model-ep005-loss3.438-val_loss3.789.h5'
+  filename = 'models/model-ep005-loss3.454-val_loss3.872.h5'
   model = load_model(filename)
   # generate description
   description = generate_desc(model, tokenizer, photo, max_length)

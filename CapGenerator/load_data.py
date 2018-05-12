@@ -48,7 +48,7 @@ def load_clean_descriptions(filename, dataset):
       if image_id not in descriptions:
         descriptions[image_id] = list()
       # wrap description in tokens
-      desc = '<start> ' + ' '.join(image_desc) + ' <end>'
+      desc = 'startseq ' + ' '.join(image_desc) + ' endseq'
       # store
       descriptions[image_id].append(desc)
   return descriptions
@@ -93,7 +93,7 @@ def prepare_dataset(data='dev'):
     filename = 'Flickr8k_text/Flickr_8k.trainImages.txt'
     train = load_set(filename)
 
-    filename = 'Flickr8k_text/Flickr_8k.testImages.txt'
+    filename = 'Flickr8k_text/Flickr_8k.devImages.txt'
     test = load_set(filename)
     print('Dataset: %d' % len(train))
 
@@ -109,7 +109,7 @@ def prepare_dataset(data='dev'):
 
   elif data == 'test':
     # load test set
-    filename = 'Flickr8k_text/Flickr_8k.devImages.txt'
+    filename = 'Flickr8k_text/Flickr_8k.testImages.txt'
     test = load_set(filename)
     print('Dataset: %d' % len(test))
     # descriptions

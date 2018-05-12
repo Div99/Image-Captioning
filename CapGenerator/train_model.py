@@ -36,7 +36,7 @@ def train_model(weight = None, epochs = 10):
   val_generator = gen.data_generator(test_descriptions, test_features, tokenizer, max_length)
 
   # fit model
-  model.fit_generator(train_generator, epochs=epochs, steps_per_epoch=steps, verbose=2,
+  model.fit_generator(train_generator, epochs=epochs, steps_per_epoch=steps, verbose=1,
         callbacks=[checkpoint], validation_data=val_generator, validation_steps=val_steps)
 
   try:

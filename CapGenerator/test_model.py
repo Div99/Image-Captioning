@@ -5,6 +5,9 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.models import load_model
 from nltk.translate.bleu_score import corpus_bleu
 
+import load_data as ld
+import generate_model as gen
+
 # map an integer to a word
 def word_for_id(integer, tokenizer):
   for word, index in tokenizer.word_index.items():
@@ -58,35 +61,22 @@ def evaluate_model(model, descriptions, photos, tokenizer, max_length):
 # prepare tokenizer on train set
 
 # load training dataset (6K)
-filename = 'Flickr8k_text/Flickr_8k.trainImages.txt'
-train = load_set(filename)
-print('Dataset: %d' % len(train))
-# descriptions
-train_descriptions = load_clean_descriptions('descriptions.txt', train)
-print('Descriptions: train=%d' % len(train_descriptions))
+train_features, train_descriptions = ld.prepare_dataset('train')[0]
 # prepare tokenizer
-tokenizer = create_tokenizer(train_descriptions)
+tokenizer = gen.create_tokenizer(train_descriptions)
 vocab_size = len(tokenizer.word_index) + 1
 print('Vocabulary Size: %d' % vocab_size)
 # determine the maximum sequence length
-max_length = max_length(train_descriptions)
+max_length = gen.max_length(train_descriptions)
 print('Description Length: %d' % max_length)
 
 # prepare test set
 
 # load test set
-filename = 'Flickr8k_text/Flickr_8k.devImages.txt'
-test = load_set(filename)
-print('Dataset: %d' % len(test))
-# descriptions
-test_descriptions = load_clean_descriptions('descriptions.txt', test)
-print('Descriptions: test=%d' % len(test_descriptions))
-# photo features
-test_features = load_photo_features('features.pkl', test)
-print('Photos: test=%d' % len(test_features))
+test_features, test_descriptions = ld.prepare_dataset('test')[1]
 
 # load the model
-filename = 'model-ep005-loss3.438-val_loss3.789.h5'
+filename = 'models/model-ep005-loss3.438-val_loss3.789.h5'
 model = load_model(filename)
 # evaluate model
 evaluate_model(model, test_descriptions, test_features, tokenizer, max_length)

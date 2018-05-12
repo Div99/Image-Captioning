@@ -63,7 +63,10 @@ def load_photo_features(filename, dataset):
 
 def prepare_dataset(data='dev'):
 
-  assert data in ['dev', 'train']
+  assert data in ['dev', 'train', 'test']
+
+  train_features = None
+  train_descriptions = None
 
   if data == 'dev':
     # load dev set (1K)
@@ -103,6 +106,18 @@ def prepare_dataset(data='dev'):
     train_features = load_photo_features('models/features.pkl', train)
     test_features = load_photo_features('models/features.pkl', test)
     print('Photos: train=%d, test=%d' % (len(train_features), len(test_features)))
+
+  elif data == 'test':
+    # load test set
+    filename = 'Flickr8k_text/Flickr_8k.devImages.txt'
+    test = load_set(filename)
+    print('Dataset: %d' % len(test))
+    # descriptions
+    test_descriptions = load_clean_descriptions('models/descriptions.txt', test)
+    print('Descriptions: test=%d' % len(test_descriptions))
+    # photo features
+    test_features = load_photo_features('models/features.pkl', test)
+    print('Photos: test=%d' % len(test_features))
 
   return (train_features, train_descriptions), (test_features, test_descriptions)
 

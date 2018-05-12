@@ -13,6 +13,10 @@ def train_model(weight = None, epochs = 10):
   tokenizer = gen.create_tokenizer(train_descriptions)
   # save the tokenizer
   dump(tokenizer, open('models/tokenizer.pkl', 'wb'))
+  # index_word dict
+  index_word = {v: k for k, v in tokenizer.word_index.items()}
+  # save dict
+  dump(index_word, open('models/index_word.pkl', 'wb'))
 
   vocab_size = len(tokenizer.word_index) + 1
   print('Vocabulary Size: %d' % vocab_size)

@@ -31,15 +31,8 @@ def extract_features(filename):
   feature = model.predict(image, verbose=0)
   return feature
 
-# map an integer to a word
-def word_for_id(integer, tokenizer):
-  for word, index in tokenizer.word_index.items():
-    if index == integer:
-      return word
-  return None
-
 # generate a description for an image
-def generate_desc(model, tokenizer, photo, max_length):
+def generate_desc(model, tokenizer, photo, index_word, max_length):
   # seed the generation process
   in_text = 'startseq'
   # iterate over the whole length of the sequence
@@ -53,7 +46,7 @@ def generate_desc(model, tokenizer, photo, max_length):
     # convert probability to integer
     yhat = argmax(yhat)
     # map integer to word
-    word = word_for_id(yhat, tokenizer)
+    word = index_word.get(yhat)
     # stop if we cannot map the word
     if word is None:
       break
@@ -65,12 +58,12 @@ def generate_desc(model, tokenizer, photo, max_length):
   return in_text
 
 # evaluate the skill of the model
-def evaluate_model(model, descriptions, photos, tokenizer, max_length):
+def evaluate_model(model, descriptions, photos, tokenizer, index_word, max_length):
   actual, predicted = list(), list()
   # step over the whole set
   for key, desc_list in descriptions.items():
     # generate description
-    yhat = generate_desc(model, tokenizer, photos[key], max_length)
+    yhat = generate_desc(model, tokenizer, photos[key], index_word, max_length)
     # store actual and predicted
     references = [d.split() for d in desc_list]
     actual.append(references)
@@ -81,11 +74,6 @@ def evaluate_model(model, descriptions, photos, tokenizer, max_length):
   print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.3, 0.3, 0.3, 0)))
   print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
-# load test set
-#test_features, test_descriptions = ld.prepare_dataset('test')[1]
-
-# evaluate model
-#evaluate_model(model, test_descriptions, test_features, tokenizer, max_length)
 
 
 if __name__ == '__main__':
@@ -94,15 +82,25 @@ if __name__ == '__main__':
   parser.add_argument("-i", "--image", help="Input image path")
   args = parser.parse_args()
 
-  # load and prepare the photograph
-  photo = extract_features(args.image)
+
   # load the tokenizer
   tokenizer = load(open('models/tokenizer.pkl', 'rb'))
+  index_word = load(open('models/index_word.pkl', 'rb'))
   # pre-define the max sequence length (from training)
   max_length = 34
   # load the model
   filename = 'models/model-ep005-loss3.454-val_loss3.872.h5'
   model = load_model(filename)
-  # generate description
-  description = generate_desc(model, tokenizer, photo, max_length)
-  print(description)
+
+  if args.image:
+    # load and prepare the photograph
+    photo = extract_features(args.image)
+    # generate description
+    description = generate_desc(model, tokenizer, photo, index_word, max_length)
+    print(description)
+  else:
+    # load test set
+    test_features, test_descriptions = ld.prepare_dataset('test')[1]
+
+    # evaluate model
+    evaluate_model(model, test_descriptions, test_features, tokenizer, index_word, max_length)

@@ -7,6 +7,7 @@ from keras.preprocessing.image import img_to_array
 from keras.applications.vgg16 import preprocess_input
 from keras.models import Model
 from keras.models import load_model
+from nltk.translate.bleu_score import corpus_bleu
 
 import load_data as ld
 import generate_model as gen
@@ -80,6 +81,7 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='Generate image captions')
   parser.add_argument("-i", "--image", help="Input image path")
+  parser.add_argument("-m", "--model", help="model checkpoint")
   args = parser.parse_args()
 
 
@@ -88,8 +90,12 @@ if __name__ == '__main__':
   index_word = load(open('models/index_word.pkl', 'rb'))
   # pre-define the max sequence length (from training)
   max_length = 34
+
   # load the model
-  filename = 'models/model-ep005-loss3.454-val_loss3.872.h5'
+  if args.model:
+    filename = args.model
+  else:
+    filename = 'models/model-ep005-loss3.454-val_loss3.872.h5'
   model = load_model(filename)
 
   if args.image:

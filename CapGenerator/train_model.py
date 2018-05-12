@@ -1,6 +1,7 @@
 import load_data as ld
 import generate_model as gen
 from keras.callbacks import ModelCheckpoint
+from pickle import dump
 
 def train_model(weight = None, epochs = 10):
   # load dataset
@@ -10,6 +11,9 @@ def train_model(weight = None, epochs = 10):
 
   # prepare tokenizer
   tokenizer = gen.create_tokenizer(train_descriptions)
+  # save the tokenizer
+  dump(tokenizer, open('models/tokenizer.pkl', 'wb'))
+
   vocab_size = len(tokenizer.word_index) + 1
   print('Vocabulary Size: %d' % vocab_size)
 

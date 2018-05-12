@@ -1,12 +1,35 @@
-from numpy import argmax
 from pickle import load
-from keras.preprocessing.text import Tokenizer
+from numpy import argmax
 from keras.preprocessing.sequence import pad_sequences
+from keras.applications.vgg16 import VGG16
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.applications.vgg16 import preprocess_input
+from keras.models import Model
 from keras.models import load_model
-from nltk.translate.bleu_score import corpus_bleu
 
 import load_data as ld
 import generate_model as gen
+import argparse
+
+# extract features from each photo in the directory
+def extract_features(filename):
+  # load the model
+  model = VGG16()
+  # re-structure the model
+  model.layers.pop()
+  model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
+  # load the photo
+  image = load_img(filename, target_size=(224, 224))
+  # convert the image pixels to a numpy array
+  image = img_to_array(image)
+  # reshape data for the model
+  image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
+  # prepare the image for the VGG model
+  image = preprocess_input(image)
+  # get features
+  feature = model.predict(image, verbose=0)
+  return feature
 
 # map an integer to a word
 def word_for_id(integer, tokenizer):
@@ -18,7 +41,7 @@ def word_for_id(integer, tokenizer):
 # generate a description for an image
 def generate_desc(model, tokenizer, photo, max_length):
   # seed the generation process
-  in_text = '<start>'
+  in_text = 'startseq'
   # iterate over the whole length of the sequence
   for i in range(max_length):
     # integer encode input sequence
@@ -37,7 +60,7 @@ def generate_desc(model, tokenizer, photo, max_length):
     # append as input for generating the next word
     in_text += ' ' + word
     # stop if we predict the end of the sequence
-    if word == '<end>':
+    if word == 'endseq':
       break
   return in_text
 
@@ -58,25 +81,28 @@ def evaluate_model(model, descriptions, photos, tokenizer, max_length):
   print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.3, 0.3, 0.3, 0)))
   print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
-# prepare tokenizer on train set
-
-# load training dataset (6K)
-train_features, train_descriptions = ld.prepare_dataset('train')[0]
-# prepare tokenizer
-tokenizer = gen.create_tokenizer(train_descriptions)
-vocab_size = len(tokenizer.word_index) + 1
-print('Vocabulary Size: %d' % vocab_size)
-# determine the maximum sequence length
-max_length = gen.max_length(train_descriptions)
-print('Description Length: %d' % max_length)
-
-# prepare test set
-
 # load test set
-test_features, test_descriptions = ld.prepare_dataset('test')[1]
+#test_features, test_descriptions = ld.prepare_dataset('test')[1]
 
-# load the model
-filename = 'models/model-ep005-loss3.438-val_loss3.789.h5'
-model = load_model(filename)
 # evaluate model
-evaluate_model(model, test_descriptions, test_features, tokenizer, max_length)
+#evaluate_model(model, test_descriptions, test_features, tokenizer, max_length)
+
+
+if __name__ == '__main__':
+
+  parser = argparse.ArgumentParser(description='Generate image captions')
+  parser.add_argument("-i", "--image", help="Input image path")
+  args = parser.parse_args()
+
+  # load and prepare the photograph
+  photo = extract_features(args.image)
+  # load the tokenizer
+  tokenizer = load(open('models/tokenizer.pkl', 'rb'))
+  # pre-define the max sequence length (from training)
+  max_length = 34
+  # load the model
+  filename = 'models/model-ep005-loss3.438-val_loss3.789.h5'
+  model = load_model(filename)
+  # generate description
+  description = generate_desc(model, tokenizer, photo, max_length)
+  print(description)

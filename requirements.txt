@@ -3,5 +3,6 @@ Keras
 numpy
 pydot
 Pillow
+nltk
 tensorflow
 progressbar2

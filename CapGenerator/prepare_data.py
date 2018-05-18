@@ -19,7 +19,7 @@ def load_image(path):
     return np.asarray(img)
 
 # extract features from each photo in the directory
-def extract_features(directory,is_attention=True):
+def extract_features(directory,is_attention=False):
   # load the model
   if is_attention:
     model = VGG16()

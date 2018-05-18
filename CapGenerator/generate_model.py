@@ -71,7 +71,7 @@ def data_generator(descriptions, photos, tokenizer, max_length):
       yield [[in_img, in_seq], out_word]
 
 # define the captioning model
-def define_model(vocab_size, max_length)
+def define_model(vocab_size, max_length):
   # feature extractor (encoder)
   inputs1 = Input(shape=(4096,))
   fe1 = Dropout(0.5)(inputs1)

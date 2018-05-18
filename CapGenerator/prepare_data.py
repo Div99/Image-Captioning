@@ -4,7 +4,7 @@ from keras.applications.vgg16 import VGG16
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 from keras.applications.vgg16 import preprocess_input
-from keras.layers import Input
+from keras.layers import Input, Reshape, Concatenate
 import numpy as np
 import string
 from progressbar import progressbar
@@ -19,15 +19,24 @@ def load_image(path):
     return np.asarray(img)
 
 # extract features from each photo in the directory
-def extract_features(directory):
+def extract_features(directory,is_attention=True):
   # load the model
-  model = VGG16()
-  # re-structure the model
-  model.layers.pop()
-  model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
-  print(model.summary())
-  # extract features from each photo
-  features = dict()
+  if is_attention:
+    model = VGG16()
+    model.layers.pop()
+    # extract final 49x512 conv layer for context vectors
+    final_conv = Reshape([49,512])(model.layers[-4].output)
+    model = Model(inputs=model.inputs, outputs=final_conv)
+    print(model.summary())
+    features = dict()
+  else:
+    model = VGG16()
+    # re-structure the model
+    model.layers.pop()
+    model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
+    print(model.summary())
+    # extract features from each photo
+    features = dict()
 
   for name in progressbar(listdir(directory)):
     # ignore README

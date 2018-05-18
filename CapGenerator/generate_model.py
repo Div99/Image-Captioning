@@ -4,14 +4,18 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 from keras.utils import plot_model
-from keras.models import Model
+from keras.models import Model, Sequential
 from keras.layers import Input
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Embedding
 from keras.layers import Dropout
-from keras.layers.merge import add
+from keras.layers import RepeatVector
+from keras.layers import TimeDistributed
+from keras.layers import concatenate
 from keras.callbacks import ModelCheckpoint
+
+EMBEDDING_DIM = 128
 
 # convert a dictionary of clean descriptions to a list of descriptions
 def to_lines(descriptions):
@@ -67,24 +71,29 @@ def data_generator(descriptions, photos, tokenizer, max_length):
       yield [[in_img, in_seq], out_word]
 
 # define the captioning model
-def define_model(vocab_size, max_length):
-  # feature extractor model
+def define_model(vocab_size, max_length)
+  # feature extractor (encoder)
   inputs1 = Input(shape=(4096,))
   fe1 = Dropout(0.5)(inputs1)
-  fe2 = Dense(256, activation='relu')(fe1)
-  # sequence model
+  fe2 = Dense(EMBEDDING_DIM, activation='relu')(fe1)
+  fe3 = RepeatVector(max_length)(fe2)
+
+  # embedding
   inputs2 = Input(shape=(max_length,))
-  se1 = Embedding(vocab_size, 256, mask_zero=True)(inputs2)
-  se2 = Dropout(0.5)(se1)
-  se3 = LSTM(256)(se2)
-  # decoder model
-  decoder1 = add([fe2, se3])
-  decoder2 = Dense(256, activation='relu')(decoder1)
-  outputs = Dense(vocab_size, activation='softmax')(decoder2)
+  emb2 = Embedding(vocab_size, 256, mask_zero=True)(inputs2)
+  emb3 = LSTM(256, return_sequences=True)(emb2)
+  emb4 = TimeDistributed(Dense(EMBEDDING_DIM, activation='relu'))(emb3)
+
+  # merge inputs
+  merged = concatenate([fe3, emb4])
+  # language model (decoder)
+  lm2 = LSTM(1000)(merged)
+  #lm3 = Dense(500, activation='relu')(lm2)
+  outputs = Dense(vocab_size, activation='softmax')(lm2)
+
   # tie it together [image, seq] [word]
   model = Model(inputs=[inputs1, inputs2], outputs=outputs)
   model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-  # summarize model
   print(model.summary())
-  plot_model(model, to_file='model.png', show_shapes=True)
+  plot_model(model, show_shapes=True, to_file='model.png')
   return model

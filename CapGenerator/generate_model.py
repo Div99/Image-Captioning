@@ -83,7 +83,7 @@ def define_model(vocab_size, max_length):
   outputs = Dense(vocab_size, activation='softmax')(decoder2)
   # tie it together [image, seq] [word]
   model = Model(inputs=[inputs1, inputs2], outputs=outputs)
-  model.compile(loss='categorical_crossentropy', optimizer='adam')
+  model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
   # summarize model
   print(model.summary())
   plot_model(model, to_file='model.png', show_shapes=True)

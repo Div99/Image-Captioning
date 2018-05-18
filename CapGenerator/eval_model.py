@@ -33,30 +33,50 @@ def extract_features(filename):
   return feature
 
 # generate a description for an image
-def generate_desc(model, tokenizer, photo, index_word, max_length):
+def generate_desc(model, tokenizer, photo, index_word, max_length, beam_size=10):
+
+  captions = [['startseq', 0.0]]
   # seed the generation process
   in_text = 'startseq'
   # iterate over the whole length of the sequence
   for i in range(max_length):
-    # integer encode input sequence
-    sequence = tokenizer.texts_to_sequences([in_text])[0]
-    # pad input
-    sequence = pad_sequences([sequence], maxlen=max_length)
-    # predict next word
-    yhat = model.predict([photo,sequence], verbose=0)
-    # convert probability to integer
-    yhat = argmax(yhat)
-    # map integer to word
-    word = index_word.get(yhat)
-    # stop if we cannot map the word
-    if word is None:
-      break
+    all_caps = []
+    # expand each current candidate
+    for cap in captions:
+      sentence, score = cap
+      # if final word is 'end' token, just add the current caption
+      if sentence.split()[-1] == 'endseq':
+        all_caps.append(cap)
+        continue
+      # integer encode input sequence
+      sequence = tokenizer.texts_to_sequences([sentence])[0]
+      # pad input
+      sequence = pad_sequences([sequence], maxlen=max_length)
+      # predict next words
+      yhat = model.predict([photo,sequence], verbose=0)
+      # convert probability to integer
+      yhats = np.argsort(yhat)[-beam_size:]
+
+      for j in yhats:
+        # map integer to word
+        word = index_word.get(yhat)
+        # stop if we cannot map the word
+        if word is None:
+          continue
+        # Add word to caption, and generate negative log prob
+        caption = [sentence + ' ' + word, score - np.log(yhat[j])]
+        all_caps.append(caption)
+
+    # order all candidates by score
+    ordered = sorted(all_caps, key=lambda tup:tup[1], reverse=True)
+    captions = ordered[:beam_size]
+
     # append as input for generating the next word
     in_text += ' ' + word
     # stop if we predict the end of the sequence
-    if word == 'endseq':
+
       break
-  return in_text
+  return captions
 
 # evaluate the skill of the model
 def evaluate_model(model, descriptions, photos, tokenizer, index_word, max_length):
@@ -64,11 +84,12 @@ def evaluate_model(model, descriptions, photos, tokenizer, index_word, max_lengt
   # step over the whole set
   for key, desc_list in descriptions.items():
     # generate description
-    yhat = generate_desc(model, tokenizer, photos[key], index_word, max_length)
+    yhat = generate_desc(model, tokenizer, photos[key], index_word, max_length)[0]
     # store actual and predicted
     references = [d.split() for d in desc_list]
     actual.append(references)
-    predicted.append(yhat.split())
+    # Use best caption
+    predicted.append(yhat[0].split())
   # calculate BLEU score
   print('BLEU-1: %f' % corpus_bleu(actual, predicted, weights=(1.0, 0, 0, 0)))
   print('BLEU-2: %f' % corpus_bleu(actual, predicted, weights=(0.5, 0.5, 0, 0)))
@@ -102,8 +123,9 @@ if __name__ == '__main__':
     # load and prepare the photograph
     photo = extract_features(args.image)
     # generate description
-    description = generate_desc(model, tokenizer, photo, index_word, max_length)
-    print(description)
+    captions = generate_desc(model, tokenizer, photo, index_word, max_length)
+    for cap in captions:
+      print('{}. log_prob: {}'.format(cap[0],cap[1]))
   else:
     # load test set
     test_features, test_descriptions = ld.prepare_dataset('test')[1]

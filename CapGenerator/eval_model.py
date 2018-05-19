@@ -33,7 +33,7 @@ def extract_features(filename):
   return feature
 
 # generate a description for an image
-def generate_desc(model, tokenizer, photo, index_word, max_length, beam_size=10):
+def generate_desc(model, tokenizer, photo, index_word, max_length, beam_size=5):
 
   captions = [['startseq', 0.0]]
   # seed the generation process
@@ -91,7 +91,19 @@ def evaluate_model(model, descriptions, photos, tokenizer, index_word, max_lengt
   print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.3, 0.3, 0.3, 0)))
   print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
-
+def eval_test_set(model, descriptions, photos, tokenizer, index_word, max_length):
+  actual, predicted = list(), list()
+  # step over the whole set
+  for key, desc_list in descriptions.items():
+    # generate description
+    yhat = generate_desc(model, tokenizer, photos[key], index_word, max_length)[0]
+    # store actual and predicted
+    references = [d.split() for d in desc_list]
+    actual.append(references)
+    # Use best caption
+    predicted.append(yhat[0].split())
+  predicted = sorted(predicted)
+  actual = [x for _,x in sorted(zip(actual,predicted))]
 
 if __name__ == '__main__':
 
@@ -111,7 +123,7 @@ if __name__ == '__main__':
   if args.model:
     filename = args.model
   else:
-    filename = 'models/model-ep005-loss3.454-val_loss3.872.h5'
+    filename = 'models/model-ep005-loss3.504-val_loss3.893.h5'
   model = load_model(filename)
 
   if args.image:

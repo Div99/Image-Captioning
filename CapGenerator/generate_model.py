@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 from pickle import load
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -14,8 +15,13 @@ from keras.layers import RepeatVector
 from keras.layers import TimeDistributed
 from keras.layers import concatenate
 from keras.callbacks import ModelCheckpoint
+from keras.optimizers import Adam
 
-EMBEDDING_DIM = 128
+EMBEDDING_DIM = 256
+
+lstm_layers = 2
+dropout_rate = 0.2
+learning_rate = 0.001
 
 # convert a dictionary of clean descriptions to a list of descriptions
 def to_lines(descriptions):
@@ -41,7 +47,7 @@ def max_length(descriptions):
 def create_sequences(tokenizer, max_length, desc_list, photo):
   vocab_size = len(tokenizer.word_index) + 1
 
-  X1, X2, y = list(), list(), list()
+  X1, X2, y = [], [], []
   # walk through each description for the image
   for desc in desc_list:
     # encode the sequence
@@ -61,14 +67,51 @@ def create_sequences(tokenizer, max_length, desc_list, photo):
   return np.array(X1), np.array(X2), np.array(y)
 
 # data generator, intended to be used in a call to model.fit_generator()
-def data_generator(descriptions, photos, tokenizer, max_length):
+def data_generator(descriptions, photos, tokenizer, max_length, n_step = 1):
   # loop for ever over images
   while 1:
-    for key, desc_list in descriptions.items():
-      # retrieve the photo feature
-      photo = photos[key][0]
-      in_img, in_seq, out_word = create_sequences(tokenizer, max_length, desc_list, photo)
-      yield [[in_img, in_seq], out_word]
+    # loop over photo identifiers in the dataset
+    keys = list(descriptions.keys())
+    for i in range(0, len(keys), n_step):
+      Ximages, XSeq, y = list(), list(),list()
+      for j in range(i, min(len(keys), i+n_step)):
+        image_id = keys[j]
+        # retrieve the photo feature
+        photo = photos[image_id][0]
+        desc_list = descriptions[image_id]
+        in_img, in_seq, out_word = create_sequences(tokenizer, max_length, desc_list, photo)
+        for k in range(len(in_img)):
+          Ximages.append(in_img[k])
+          XSeq.append(in_seq[k])
+          y.append(out_word[k])
+      yield [[np.array(Ximages), np.array(XSeq)], np.array(y)]
+
+def categorical_crossentropy_from_logits(y_true, y_pred):
+  y_true = y_true[:, :-1, :]  # Discard the last timestep
+  y_pred = y_pred[:, :-1, :]  # Discard the last timestep
+  loss = tf.nn.softmax_cross_entropy_with_logits(labels=y_true,
+                                                 logits=y_pred)
+  return loss
+
+def categorical_accuracy_with_variable_timestep(y_true, y_pred):
+  y_true = y_true[:, :-1, :]  # Discard the last timestep
+  y_pred = y_pred[:, :-1, :]  # Discard the last timestep
+
+  # Flatten the timestep dimension
+  shape = tf.shape(y_true)
+  y_true = tf.reshape(y_true, [-1, shape[-1]])
+  y_pred = tf.reshape(y_pred, [-1, shape[-1]])
+
+  # Discard rows that are all zeros as they represent padding words.
+  is_zero_y_true = tf.equal(y_true, 0)
+  is_zero_row_y_true = tf.reduce_all(is_zero_y_true, axis=-1)
+  y_true = tf.boolean_mask(y_true, ~is_zero_row_y_true)
+  y_pred = tf.boolean_mask(y_pred, ~is_zero_row_y_true)
+
+  accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(y_true, axis=1),
+                                              tf.argmax(y_pred, axis=1)),
+                                    dtype=tf.float32))
+  return accuracy
 
 # define the captioning model
 def define_model(vocab_size, max_length):
@@ -80,14 +123,12 @@ def define_model(vocab_size, max_length):
 
   # embedding
   inputs2 = Input(shape=(max_length,))
-  emb2 = Embedding(vocab_size, 256, mask_zero=True)(inputs2)
-  emb3 = LSTM(256, return_sequences=True)(emb2)
-  emb4 = TimeDistributed(Dense(EMBEDDING_DIM, activation='relu'))(emb3)
+  emb2 = Embedding(vocab_size, EMBEDDING_DIM, mask_zero=True)(inputs2)
 
   # merge inputs
-  merged = concatenate([fe3, emb4])
+  merged = concatenate([fe3, emb2])
   # language model (decoder)
-  lm2 = LSTM(1000)(merged)
+  lm2 = LSTM(500, return_sequences=False)(merged)
   #lm3 = Dense(500, activation='relu')(lm2)
   outputs = Dense(vocab_size, activation='softmax')(lm2)
 

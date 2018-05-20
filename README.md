@@ -5,7 +5,7 @@ Image Captioning System that generates natural language captions for any image.
 
 The architecture for the model is inspired from "Show and Tell" [1] by Vinyals et al. The model is built using [Keras](https://keras.io/)
 
-Also contains code for Attention LSTM layer, although not integrated in the model. 
+The project also contains code for Attention LSTM layer, although not integrated in the model. 
 
 ## Dataset
 The model is trained on [Flickr8k Dataset](https://illinois.edu/fb/sec/1713398)
@@ -42,12 +42,20 @@ These requirements can be easily installed by:
 
 ## Usage
 
+### Pre-trained model 
+1. Download pre-trained weights from (releases)[https://github.com/Div99/Image-Captioning/releases]
+2. Move `model_weight.h5` to `models` dir
+3. Prepare data using `python prepare_data.py`
+4. For inference on example image, run: `python eval_model.py -i [img-path]` 
+
+### From scratch
 After the requirements have been installed, the process from training to testing is fairly easy. The commands to run:
 1. `python prepare_data.py`
 2. `python train_model.py`
 3. `python eval_model.py`
 
-After training, evaluation on an example image can be done by running: `python eval_model.py -m [model-checkpoint] -i [img-path]`
+After training, evaluation on an example image can be done by running:  
+```python eval_model.py -m [model-checkpoint] -i [img-path]```
 
 ----------------------------------
 

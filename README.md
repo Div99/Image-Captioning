@@ -38,13 +38,13 @@ These requirements can be easily installed by:
 - __caption_generator.py__: The base script that contains functions for model creation, batch data generator etc.
 - __prepare_data.py__: Extracts features from images using VGG16 imagenet model. Also prepares annotation for training. Changes have to be done to this script if new dataset is to be used.
 - __train_model.py__: Module for training the caption generator.
-- __eval_model.py__: Contains module for evaluating and testing the performance of the caption generator, currently, it contains the (BLEU)[https://en.wikipedia.org/wiki/BLEU] metric.
+- __eval_model.py__: Contains module for evaluating and testing the performance of the caption generator, currently, it contains the [BLEU](https://en.wikipedia.org/wiki/BLEU) metric.
 
 ## Usage
 
 ### Pre-trained model 
-1. Download pre-trained weights from (releases)[https://github.com/Div99/Image-Captioning/releases]
-2. Move `model_weight.h5` to `models` dir
+1. Download pre-trained weights from [releases](https://github.com/Div99/Image-Captioning/releases)
+2. Move `model_weight.h5` to `models` directory
 3. Prepare data using `python prepare_data.py`
 4. For inference on example image, run: `python eval_model.py -i [img-path]` 
 

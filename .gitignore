@@ -108,5 +108,5 @@ Flickr*/*
 models/*
 
 # Don't ignore README
-!Flickr/README.md
+!Flickr*/README.md
 !models/README.md

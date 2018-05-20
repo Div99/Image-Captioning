@@ -1,12 +1,24 @@
 
-# Image-Captioning
+# Image Captioning (Keras)
 
-Image Captioning System trained on Flick8k Dataset.
+Image Captioning System that generates natural language captions for any image. 
 
+The architecture for the model is inspired from "Show and Tell" [1] by Vinyals et al. The model is built using [Keras](https://keras.io/)
 
+Also contains code for Attention LSTM layer, although not integrated in the model. 
 
+## Dataset
+The model is trained on [Flickr8k Dataset](https://illinois.edu/fb/sec/1713398)
 
-Download the Flick8k Dataset here: [DataSet Request Form](https://illinois.edu/fb/sec/1713398)
+Although it can be trained on others like Flickr30k or MS COCO
+
+## Model 
+<div align="center">
+  <img src="model.png"><br><br>
+</div>
+
+## Performance
+The model has been trained for 20 epoches on 6000 training samples of Flickr8k Dataset. It acheives a `BLEU-1 = ~0.59` with 1000 testing samples.
 
 ----------------------------------
 
@@ -26,7 +38,7 @@ These requirements can be easily installed by:
 - __caption_generator.py__: The base script that contains functions for model creation, batch data generator etc.
 - __prepare_data.py__: Extracts features from images using VGG16 imagenet model. Also prepares annotation for training. Changes have to be done to this script if new dataset is to be used.
 - __train_model.py__: Module for training the caption generator.
-- __eval_model.py__: Contains module for testing the performance of the caption generator, currently, it contains the (BLEU)[https://en.wikipedia.org/wiki/BLEU] metric. New metrics can be added.
+- __eval_model.py__: Contains module for evaluating and testing the performance of the caption generator, currently, it contains the (BLEU)[https://en.wikipedia.org/wiki/BLEU] metric.
 
 ## Usage
 
@@ -35,4 +47,11 @@ After the requirements have been installed, the process from training to testing
 2. `python train_model.py`
 3. `python eval_model.py`
 
-After training, evaluation on an example image can be done by running: `python eval_model.py -i <img-path>`
+After training, evaluation on an example image can be done by running: `python eval_model.py -m [model-checkpoint] -i [img-path]`
+
+----------------------------------
+
+## References 
+[1] Oriol Vinyals, Alexander Toshev, Samy Bengio, Dumitru Erhan. [Show and Tell: A Neural Image Caption Generator](https://arxiv.org/pdf/1411.4555.pdf)
+
+[2]	Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron Courville, Ruslan Salakhutdinov, Richard Zemel, Yoshua Bengio. [Show, Attend and Tell: Neural Image Caption Generation with Visual Attention](https://arxiv.org/pdf/1502.03044.pdf)

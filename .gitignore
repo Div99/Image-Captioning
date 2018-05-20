@@ -105,7 +105,6 @@ ENV/
 
 # Datasets
 Flickr*/*
-models/*
 
 # Don't ignore README
 !Flickr*/README.md

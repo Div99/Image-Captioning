@@ -141,4 +141,4 @@ if __name__ == '__main__':
     test_features, test_descriptions = ld.prepare_dataset('test')[1]
 
     # evaluate model
-    evaluate_model(model, test_descriptions, test_features, tokenizer, index_word, max_length)
+    evaluate_model(model, test_descriptions, test_features, tokenizer, index_word, max_length))

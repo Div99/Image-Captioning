@@ -109,4 +109,4 @@ models/*
 
 # Don't ignore README
 !Flickr*/README.md
-!models/README.md
+!models/README.mdd

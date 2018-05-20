@@ -1,18 +1,18 @@
 
 # Image Captioning (Keras)
 
-Image Captioning System that generates natural language captions for any image. 
+Image Captioning System that generates natural language captions for any image.
 
-The architecture for the model is inspired from "Show and Tell" [1] by Vinyals et al. The model is built using [Keras](https://keras.io/)
+The architecture for the model is inspired from "Show and Tell" [1] by Vinyals et al. The model is built using [Keras](https://keras.io/) library.
 
-The project also contains code for Attention LSTM layer, although not integrated in the model. 
+The project also contains code for Attention LSTM layer, although not integrated in the model.
 
 ## Dataset
 The model is trained on [Flickr8k Dataset](https://illinois.edu/fb/sec/1713398)
 
 Although it can be trained on others like Flickr30k or MS COCO
 
-## Model 
+## Model
 <div align="center">
   <img src="model.png"><br><br>
 </div>
@@ -42,11 +42,11 @@ These requirements can be easily installed by:
 
 ## Usage
 
-### Pre-trained model 
+### Pre-trained model
 1. Download pre-trained weights from [releases](https://github.com/Div99/Image-Captioning/releases)
 2. Move `model_weight.h5` to `models` directory
 3. Prepare data using `python prepare_data.py`
-4. For inference on example image, run: `python eval_model.py -i [img-path]` 
+4. For inference on example image, run: `python eval_model.py -i [img-path]`
 
 ### From scratch
 After the requirements have been installed, the process from training to testing is fairly easy. The commands to run:
@@ -54,12 +54,12 @@ After the requirements have been installed, the process from training to testing
 2. `python train_model.py`
 3. `python eval_model.py`
 
-After training, evaluation on an example image can be done by running:  
+After training, evaluation on an example image can be done by running:
 ```python eval_model.py -m [model-checkpoint] -i [img-path]```
 
 ----------------------------------
 
-## References 
+## References
 [1] Oriol Vinyals, Alexander Toshev, Samy Bengio, Dumitru Erhan. [Show and Tell: A Neural Image Caption Generator](https://arxiv.org/pdf/1411.4555.pdf)
 
 [2]	Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron Courville, Ruslan Salakhutdinov, Richard Zemel, Yoshua Bengio. [Show, Attend and Tell: Neural Image Caption Generation with Visual Attention](https://arxiv.org/pdf/1502.03044.pdf)

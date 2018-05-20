@@ -123,7 +123,7 @@ if __name__ == '__main__':
   if args.model:
     filename = args.model
   else:
-    filename = 'models/model-ep005-loss3.504-val_loss3.893.h5'
+    filename = 'models/model_weight.h5'
   model = load_model(filename)
 
   if args.image:

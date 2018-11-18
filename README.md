@@ -57,6 +57,14 @@ After the requirements have been installed, the process from training to testing
 After training, evaluation on an example image can be done by running:  
 `python eval_model.py -m [model-checkpoint] -i [img-path]`
 
+## Results
+
+Image | Caption 
+--- | --- 
+<img src="imgs/dog.jpg" width="300"> | **Generated Caption:**  A white and black dog is running through the water
+<img src="imgs/ski.jpg" width="300"> | **Generated Caption:** man is skiing on snowy hill
+<img src="imgs/worker.jpg" width="300"> | **Generated Caption:** man in red shirt is walking down the street
+
 ----------------------------------
 
 ## References

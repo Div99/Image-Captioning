@@ -9,7 +9,7 @@ import pandas as pd
 import string
 
 num_samples = 8091
-batch_size = 32
+batch_size = 16
 
 # load an image from filepath
 def image_gen(path, filenames):

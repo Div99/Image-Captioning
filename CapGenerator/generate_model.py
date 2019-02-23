@@ -68,7 +68,7 @@ def create_sequences(tokenizer, max_length, desc_list, photo):
 
 # data generator, intended to be used in a call to model.fit_generator()
 def data_generator(descriptions, photos, tokenizer, max_length, n_step = 1):
-  # loop for ever over images
+  # loop forever over images
   while 1:
     # loop over photo identifiers in the dataset
     keys = list(descriptions.keys())
@@ -77,7 +77,7 @@ def data_generator(descriptions, photos, tokenizer, max_length, n_step = 1):
       for j in range(i, min(len(keys), i+n_step)):
         image_id = keys[j]
         # retrieve the photo feature
-        photo = photos[image_id][0]
+        photo = photos[image_id]
         desc_list = descriptions[image_id]
         in_img, in_seq, out_word = create_sequences(tokenizer, max_length, desc_list, photo)
         for k in range(len(in_img)):

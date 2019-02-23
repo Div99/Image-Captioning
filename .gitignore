@@ -103,6 +103,9 @@ ENV/
 # mypy
 .mypy_cache/
 
+# linter
+.flake8
+
 # Datasets
 Flickr*/*
 models/*

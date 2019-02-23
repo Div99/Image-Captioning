@@ -29,13 +29,13 @@ def train_model(weight = None, epochs = 10):
   model = gen.define_model(vocab_size, max_length)
 
   # Check if pre-trained weights to be used
-  if weight != None:
+  if weight:
     model.load_weights(weight)
 
   # define checkpoint callback
   filepath = 'models/model-ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5'
   checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1,
-                save_best_only=True, mode='min')
+                               save_best_only=True, mode='min')
 
   steps = len(train_descriptions)
   val_steps = len(test_descriptions)
@@ -44,8 +44,9 @@ def train_model(weight = None, epochs = 10):
   val_generator = gen.data_generator(test_descriptions, test_features, tokenizer, max_length)
 
   # fit model
-  model.fit_generator(train_generator, epochs=epochs, steps_per_epoch=steps, verbose=1,
-        callbacks=[checkpoint], validation_data=val_generator, validation_steps=val_steps)
+  model.fit_generator(train_generator, epochs=epochs, steps_per_epoch=steps,
+                      verbose=1, callbacks=[checkpoint], validation_data=val_generator,
+                      validation_steps=val_steps)
 
   try:
       model.save('models/wholeModel.h5', overwrite=True)

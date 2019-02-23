@@ -1,22 +1,29 @@
 from os import listdir
 from pickle import dump
 from keras.applications.vgg16 import VGG16
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
-from keras.applications.vgg16 import preprocess_input
+from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Input, Reshape, Concatenate
-import numpy as np
-import string
-from progressbar import progressbar
 from keras.models import Model
 
+import pandas as pd
+import string
+
+num_samples = 8091
+batch_size = 32
+
 # load an image from filepath
-def load_image(path):
-    img = load_img(path, target_size=(224,224))
-    img = img_to_array(img)
-    img = np.expand_dims(img, axis=0)
-    img = preprocess_input(img)
-    return np.asarray(img)
+def image_gen(path, filenames):
+  df = pd.DataFrame({'id': filenames})
+  datagen = ImageDataGenerator(rescale=1. / 255)
+  generator = datagen.flow_from_dataframe(
+      dataframe=df,
+      directory=path,
+      x_col="id",
+      target_size=(224, 224),
+      batch_size=batch_size,
+      class_mode=None,
+      shuffle=False)
+  return generator
 
 # extract features from each photo in the directory
 def extract_features(directory,is_attention=False):
@@ -27,40 +34,41 @@ def extract_features(directory,is_attention=False):
     # extract final 49x512 conv layer for context vectors
     final_conv = Reshape([49,512])(model.layers[-4].output)
     model = Model(inputs=model.inputs, outputs=final_conv)
-    print(model.summary())
-    features = dict()
   else:
     model = VGG16()
     # re-structure the model
     model.layers.pop()
     model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
     print(model.summary())
-    # extract features from each photo
-    features = dict()
 
-  for name in progressbar(listdir(directory)):
+  # extract features from each photo
+  feature_dict = dict()
+
+  filenames = []
+  for name in listdir(directory):
     # ignore README
     if name == 'README.md':
       continue
-    filename = directory + '/' + name
-    image = load_image(filename)
-    # extract features
-    feature = model.predict(image, verbose=0)
+    filenames.append(name)
+
+  # load image generator
+  gen = image_gen(directory, filenames)
+  print('Processing images in batches of size {}'.format(batch_size))
+  # extract features
+  features = model.predict_generator(gen, num_samples / batch_size, verbose=1)
+
+  for name, feature in zip(filenames, features):
     # get image id
     image_id = name.split('.')[0]
     # store feature
-    features[image_id] = feature
-    print('>%s' % name)
-  return features
+    feature_dict[image_id] = feature
+  return feature_dict
 
 # load doc into memory
 def load_doc(filename):
-  # open the file as read only
-  file = open(filename, 'r')
-  # read all text
-  text = file.read()
-  # close the file
-  file.close()
+  with open(filename, 'r') as f:
+    # read all text
+    text = f.read()
   return text
 
 # extract descriptions for images
@@ -119,9 +127,9 @@ def save_descriptions(descriptions, filename):
     for desc in desc_list:
       lines.append(key + ' ' + desc)
   data = '\n'.join(lines)
-  file = open(filename, 'w')
-  file.write(data)
-  file.close()
+  with open(filename, 'w') as f:
+    f.write(data)
+
 
 # extract features from all images
 

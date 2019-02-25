@@ -135,10 +135,10 @@ def save_descriptions(descriptions, filename):
     f.write(data)
 
 
-def generate_features(model_type):
+def generate_features(model_type, **args):
   # extract features from all images
   directory = 'Flickr8k_Dataset'
-  features = extract_features(directory, model_type)
+  features = extract_features(directory, model_type, args)
   print('Extracted Features: %d' % len(features))
   # save to pickle file
   dump(features, open('models/features.pkl', 'wb'))
@@ -162,7 +162,6 @@ def generate_features(model_type):
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Generate dataset image features')
   parser.add_argument("type",
-                      type='string',
                       default='single',
                       help='Specify type of model.'
                            'Single GPU, Multi GPU or TPU')

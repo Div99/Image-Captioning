@@ -2,7 +2,7 @@ from keras.utils import multi_gpu_model
 import tensorflow as tf
 
 
-def get_model(model, type, **args):
+def get_model(model, type, **kwargs):
     if type == 'single':
         return model
 
@@ -13,5 +13,5 @@ def get_model(model, type, **args):
         tpu_model = tf.contrib.tpu.keras_to_tpu_model(
             model,
             strategy=tf.contrib.tpu.TPUDistributionStrategy(
-                tf.contrib.cluster_resolver.TPUClusterResolver(args['TPU_WORKER'])))
+                tf.contrib.cluster_resolver.TPUClusterResolver(kwargs['TPU_WORKER'])))
         return tpu_model

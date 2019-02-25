@@ -1,4 +1,4 @@
-from keras.utils import multi_gpu_model
+from tensorflow.keras.utils import multi_gpu_model
 import tensorflow as tf
 
 

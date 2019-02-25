@@ -1,9 +1,9 @@
 from os import listdir
 from pickle import dump
-from keras.applications.vgg16 import VGG16
-from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Input, Reshape, Concatenate
-from keras.models import Model
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers import Input, Reshape, Concatenate
+from tensorflow.keras.models import Model
 
 from model import get_model
 

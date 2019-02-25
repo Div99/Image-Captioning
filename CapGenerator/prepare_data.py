@@ -12,7 +12,7 @@ import pandas as pd
 import string
 
 num_samples = 8091
-batch_size = 64
+batch_size = 128
 
 # load an image from filepath
 def image_gen(path, filenames):
@@ -29,7 +29,7 @@ def image_gen(path, filenames):
   return generator
 
 # extract features from each photo in the directory
-def extract_features(directory, model_type, is_attention=False, **args):
+def extract_features(directory, model_type, is_attention, **args):
   # load the model
   if is_attention:
     model = VGG16()
@@ -139,7 +139,7 @@ def save_descriptions(descriptions, filename):
 def generate_features(model_type, **args):
   # extract features from all images
   directory = 'Flickr8k_Dataset'
-  features = extract_features(directory, model_type, **args)
+  features = extract_features(directory, model_type, is_attention=False, **args)
   print('Extracted Features: %d' % len(features))
   # save to pickle file
   dump(features, open('models/features.pkl', 'wb'))

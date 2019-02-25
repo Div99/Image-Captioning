@@ -29,7 +29,7 @@ def image_gen(path, filenames):
   return generator
 
 # extract features from each photo in the directory
-def extract_features(directory, model_type, is_attention=False):
+def extract_features(directory, model_type, args, is_attention=False):
   # load the model
   if is_attention:
     model = VGG16()

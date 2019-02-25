@@ -5,7 +5,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Input, Reshape, Concatenate
 from keras.models import Model
 
-from model import get_model
+from .model import get_model
 
 import argparse
 import pandas as pd

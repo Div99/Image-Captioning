@@ -16,6 +16,8 @@ def get_model(model, type, **kwargs):
                 tf.contrib.cluster_resolver.TPUClusterResolver(
                     kwargs['TPU_WORKER'])))
 
+    # tf.Keras requires models to be compiled even for pre-trained weights
+    # (We just choose a random optimizer, doesn't affect prediction)
     model.compile(
         optimizer=tf.keras.optimizers.SGD(lr=0.0001, momentum=0.9),
         loss='categorical_crossentropy',

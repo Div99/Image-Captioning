@@ -4,12 +4,14 @@ from keras.applications.vgg16 import VGG16
 from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Input, Reshape, Concatenate
 from keras.models import Model
+from model import get_model
 
+import argparse
 import pandas as pd
 import string
 
 num_samples = 8091
-batch_size = 16
+batch_size = 64
 
 # load an image from filepath
 def image_gen(path, filenames):
@@ -26,7 +28,7 @@ def image_gen(path, filenames):
   return generator
 
 # extract features from each photo in the directory
-def extract_features(directory,is_attention=False):
+def extract_features(directory, model_type, is_attention=False):
   # load the model
   if is_attention:
     model = VGG16()
@@ -41,6 +43,8 @@ def extract_features(directory,is_attention=False):
     model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
     print(model.summary())
 
+  # Load appropriate model
+  model = get_model(model, model_type, **args)
   # extract features from each photo
   feature_dict = dict()
 
@@ -106,11 +110,11 @@ def clean_descriptions(descriptions):
       # remove punctuation from each token
       desc = [w.translate(table) for w in desc]
       # remove hanging 's' and 'a'
-      desc = [word for word in desc if len(word)>1]
+      desc = [word for word in desc if len(word) > 1]
       # remove tokens with numbers in them
       desc = [word for word in desc if word.isalpha()]
       # store as string
-      desc_list[i] =  ' '.join(desc)
+      desc_list[i] = ' '.join(desc)
 
 # convert the loaded descriptions into a vocabulary of words
 def to_vocabulary(descriptions):
@@ -131,26 +135,37 @@ def save_descriptions(descriptions, filename):
     f.write(data)
 
 
-# extract features from all images
+def generate_features(model_type):
+  # extract features from all images
+  directory = 'Flickr8k_Dataset'
+  features = extract_features(directory, model_type)
+  print('Extracted Features: %d' % len(features))
+  # save to pickle file
+  dump(features, open('models/features.pkl', 'wb'))
 
-directory = 'Flickr8k_Dataset'
-features = extract_features(directory)
-print('Extracted Features: %d' % len(features))
-# save to file
-dump(features, open('models/features.pkl', 'wb'))
+  # prepare descriptions
+  filename = 'Flickr8k_text/Flickr8k.token.txt'
+  # load descriptions
+  doc = load_doc(filename)
+  # parse descriptions
+  descriptions = load_descriptions(doc)
+  print('Loaded: %d ' % len(descriptions))
+  # clean descriptions
+  clean_descriptions(descriptions)
+  # summarize vocabulary
+  vocabulary = to_vocabulary(descriptions)
+  print('Vocabulary Size: %d' % len(vocabulary))
+  # save to file
+  save_descriptions(descriptions, 'models/descriptions.txt')
 
-# prepare descriptions
 
-filename = 'Flickr8k_text/Flickr8k.token.txt'
-# load descriptions
-doc = load_doc(filename)
-# parse descriptions
-descriptions = load_descriptions(doc)
-print('Loaded: %d ' % len(descriptions))
-# clean descriptions
-clean_descriptions(descriptions)
-# summarize vocabulary
-vocabulary = to_vocabulary(descriptions)
-print('Vocabulary Size: %d' % len(vocabulary))
-# save to file
-save_descriptions(descriptions, 'models/descriptions.txt')
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser(description='Generate dataset image features')
+  parser.add_argument("type",
+                      type='string',
+                      default='single',
+                      help='Specify type of model.'
+                           'Single GPU, Multi GPU or TPU')
+
+  args = parser.parse_args()
+  generate_features(args.type)

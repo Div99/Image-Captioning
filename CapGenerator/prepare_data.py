@@ -60,7 +60,7 @@ def extract_features(directory, model_type, is_attention, **kwargs):
   gen = image_gen(directory, filenames)
   print('Processing images in batches of size {}'.format(batch_size))
   # extract features
-  features = model.predict_generator(gen, num_samples / batch_size, verbose=1)
+  features = model.predict(gen, num_samples / batch_size, verbose=1)
 
   for name, feature in zip(filenames, features):
     # get image id

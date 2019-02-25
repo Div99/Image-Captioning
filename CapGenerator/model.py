@@ -4,14 +4,21 @@ import tensorflow as tf
 
 def get_model(model, type, **kwargs):
     if type == 'single':
-        return model
+        pass
 
     elif type == 'multi':
-        return multi_gpu_model(model, gpus=2, cpu_relocation=True)
+        model = multi_gpu_model(model, gpus=2, cpu_relocation=True)
 
     elif type == 'tpu':
-        tpu_model = tf.contrib.tpu.keras_to_tpu_model(
+        model = tf.contrib.tpu.keras_to_tpu_model(
             model,
             strategy=tf.contrib.tpu.TPUDistributionStrategy(
-                tf.contrib.cluster_resolver.TPUClusterResolver(kwargs['TPU_WORKER'])))
-        return tpu_model
+                tf.contrib.cluster_resolver.TPUClusterResolver(
+                    kwargs['TPU_WORKER'])))
+
+    model.compile(
+        optimizer=tf.keras.optimizers.SGD(lr=0.0001, momentum=0.9),
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
+
+    return model

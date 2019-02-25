@@ -136,7 +136,7 @@ def save_descriptions(descriptions, filename):
     f.write(data)
 
 
-def generate_features(model_type, **args):
+def generate_features(model_type, args):
   # extract features from all images
   directory = 'Flickr8k_Dataset'
   features = extract_features(directory, model_type, args)

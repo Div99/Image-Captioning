@@ -2,7 +2,7 @@ from keras.utils import multi_gpu_model
 import tensorflow as tf
 
 
-def get_model(model, type, args):
+def get_model(model, type, **args):
     if type == 'single':
         return model
 

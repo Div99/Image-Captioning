@@ -17,7 +17,7 @@ class Multi_Model:
     if self.type == 'tpu':
       total_samples = np.ceil(num_samples / batch_size)
       generator = tpu_gen(generator, num_samples % batch_size)
-      features = self.keras_model.predict_generator(generator, num_samples / batch_size, verbose=verbose)
+      features = self.keras_model.predict_generator(generator, total_samples / batch_size, verbose=verbose)
       return features[:num_samples]
 
     else:

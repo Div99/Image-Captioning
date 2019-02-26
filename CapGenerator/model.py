@@ -18,7 +18,7 @@ class Multi_Model:
       total_samples = batch_size * (num_samples // batch_size + 1)
       generator = tpu_gen(generator, num_samples % batch_size)
       print('Steps: {}'.format(total_samples // batch_size))
-      features = self.keras_model.predict_generator(generator, total_samples // batch_size, verbose=verbose)
+      features = self.keras_model.predict(generator, total_samples // batch_size, verbose=verbose)
       return features[:num_samples]
 
     else:

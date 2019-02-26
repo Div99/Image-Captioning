@@ -15,7 +15,7 @@ class Multi_Model:
     # will get dropped. So we pad with fake examples which are ignored
     # later on.
     if self.type == 'tpu':
-      total_samples = np.ceil(num_samples / batch_size).astype(int)
+      total_samples = batch_size * (num_samples // batch_size + 1)
       generator = tpu_gen(generator, num_samples % batch_size)
       print('Steps: {}'.format(total_samples / batch_size))
       features = self.keras_model.predict_generator(generator, total_samples / batch_size, verbose=verbose)

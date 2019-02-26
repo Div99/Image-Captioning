@@ -39,7 +39,7 @@ def get_model(model, type, **kwargs):
         model = multi_gpu_model(model, gpus=2, cpu_relocation=True)
         model = Multi_Model(model, 'multi')
 
-    elif type == 'tpu':
+    elif type == 'tu':
         model = tf.contrib.tpu.keras_to_tpu_model(
             model,
             strategy=tf.contrib.tpu.TPUDistributionStrategy(

@@ -3,24 +3,24 @@ import numpy as np
 import tensorflow as tf
 
 
-class Model:
+class Multi_Model:
 
   def __init__(self, keras_model, type):
     self.type = type
     self.keras_model = keras_model
 
-  def predict(self, generator, num_samples, batch_size):
+  def predict(self, generator, num_samples, batch_size, verbose):
     # TPU requires a fixed batch size for all batches, therefore the number
     # of examples must be a multiple of the batch size, or else examples
     # will get dropped. So we pad with fake examples which are ignored
     # later on.
     if self.type == 'tpu':
       generator = tpu_gen(generator, num_samples % batch_size)
-      features = self.model.predict(generator, num_samples / batch_size, verbose=1)
+      features = self.keras_model.predict(generator, num_samples / batch_size, verbose=verbose)
       return features[:num_samples]
 
     else:
-      return self.model.predict(generator, num_samples / batch_size, verbose=1)
+      return self.keras_model.predict(generator, num_samples / batch_size, verbose=verbose)
 
 
 def tpu_gen(generator, dummy_indices):
@@ -33,11 +33,11 @@ def tpu_gen(generator, dummy_indices):
 
 def get_model(model, type, **kwargs):
     if type == 'single':
-        model = Model(model, 'single')
+        model = Multi_Model(model, 'single')
 
     elif type == 'multi':
         model = multi_gpu_model(model, gpus=2, cpu_relocation=True)
-        model = Model(model, 'multi')
+        model = Multi_Model(model, 'multi')
 
     elif type == 'tpu':
         model = tf.contrib.tpu.keras_to_tpu_model(
@@ -45,7 +45,7 @@ def get_model(model, type, **kwargs):
             strategy=tf.contrib.tpu.TPUDistributionStrategy(
                 tf.contrib.cluster_resolver.TPUClusterResolver(
                     kwargs['TPU_WORKER'])))
-        model = Model(model, 'tpu')
+        model = Multi_Model(model, 'tpu')
 
     # tf.Keras requires models to be compiled even for pre-trained weights
     # (We just choose a random optimizer, doesn't affect prediction)

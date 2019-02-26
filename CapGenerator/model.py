@@ -16,11 +16,11 @@ class Multi_Model:
     # later on.
     if self.type == 'tpu':
       generator = tpu_gen(generator, num_samples % batch_size)
-      features = self.keras_model.predict(generator, num_samples / batch_size, verbose=verbose)
+      features = self.keras_model.predict_generator(generator, num_samples / batch_size, verbose=verbose)
       return features[:num_samples]
 
     else:
-      return self.keras_model.predict(generator, num_samples / batch_size, verbose=verbose)
+      return self.keras_model.predict_generator(generator, num_samples / batch_size, verbose=verbose)
 
 
 def tpu_gen(generator, dummy_indices):

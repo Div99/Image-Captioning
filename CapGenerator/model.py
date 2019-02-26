@@ -24,7 +24,7 @@ class Multi_Model:
 
 
 def tpu_gen(generator, dummy_indices):
-  dummyImage = np.zeros((224, 224))
+  dummyImage = np.zeros((224, 224), dtype=np.uint8)
   for img in generator:
     yield img
   for k in dummy_indices:

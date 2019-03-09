@@ -41,7 +41,7 @@ def extract_features(directory, model_type, is_attention, **kwargs):
     model = VGG16()
     # re-structure the model
     model.layers.pop()
-    model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
+    model = Model(inputs=model.inputs, outputs=model.get_layer('fc2').output)
     print(model.summary())
 
   # Load appropriate model

@@ -1,20 +1,20 @@
 import numpy as np
 import tensorflow as tf
 from pickle import load
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical
-from keras.utils import plot_model
-from keras.models import Model, Sequential
-from keras.layers import Input
-from keras.layers import Dense
-from keras.layers import LSTM
-from keras.layers import Embedding
-from keras.layers import Dropout
-from keras.layers import RepeatVector
-from keras.layers import TimeDistributed
-from keras.layers import concatenate
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import RepeatVector
+from tensorflow.keras.layers import TimeDistributed
+from tensorflow.keras.layers import concatenate
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 from model import get_model
 

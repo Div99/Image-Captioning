@@ -1,6 +1,6 @@
 import load_data as ld
 import generate_model as gen
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 from pickle import dump
 
 def train_model(model_type, weight = None, epochs = 10, **kwargs):

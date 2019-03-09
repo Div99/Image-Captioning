@@ -54,7 +54,7 @@ def get_model(model, type, **kwargs):
 
 
     model.keras_model.compile(
-        optimizer=tf.keras.optimizers.Adam(lr=0.0001, momentum=0.9),
+        optimizer=tf.keras.optimizers.Adam(lr=0.0001, beta_1=0.9),
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 

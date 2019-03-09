@@ -15,7 +15,9 @@ from keras.layers import RepeatVector
 from keras.layers import TimeDistributed
 from keras.layers import concatenate
 from keras.callbacks import ModelCheckpoint
-from keras.optimizers import Adam
+
+from model import get_model
+
 
 EMBEDDING_DIM = 256
 
@@ -114,7 +116,7 @@ def categorical_accuracy_with_variable_timestep(y_true, y_pred):
   return accuracy
 
 # define the captioning model
-def define_model(vocab_size, max_length):
+def define_model(model_type, vocab_size, max_length, **kwargs):
   # feature extractor (encoder)
   inputs1 = Input(shape=(4096,))
   fe1 = Dropout(0.5)(inputs1)
@@ -134,7 +136,15 @@ def define_model(vocab_size, max_length):
 
   # tie it together [image, seq] [word]
   model = Model(inputs=[inputs1, inputs2], outputs=outputs)
-  model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
   print(model.summary())
   plot_model(model, show_shapes=True, to_file='model.png')
+
+  # Load appropriate model
+  model = get_model(model, model_type, **kwargs)
+  # model.compile(
+  #   optimizer=tf.keras.optimizers.Adam(lr=0.0001, momentum=0.9),
+  #   loss='categorical_crossentropy',
+  #   metrics=['accuracy'])
+  model = model.keras_model
   return model

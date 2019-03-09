@@ -3,7 +3,7 @@ import generate_model as gen
 from keras.callbacks import ModelCheckpoint
 from pickle import dump
 
-def train_model(weight = None, epochs = 10):
+def train_model(model_type, weight = None, epochs = 10, **kwargs):
   # load dataset
   data = ld.prepare_dataset('train')
   train_features, train_descriptions = data[0]
@@ -26,7 +26,7 @@ def train_model(weight = None, epochs = 10):
   print('Description Length: %d' % max_length)
 
   # generate model
-  model = gen.define_model(vocab_size, max_length)
+  model = gen.define_model(model_type, vocab_size, max_length, **kwargs)
 
   # Check if pre-trained weights to be used
   if weight:
@@ -56,4 +56,11 @@ def train_model(weight = None, epochs = 10):
   print("Training complete...\n")
 
 if __name__ == '__main__':
-    train_model(epochs=20)
+  parser = argparse.ArgumentParser(description='Train Model')
+  parser.add_argument("-t", "--type",
+                      default='single',
+                      help='Specify type of model.'
+                           'Single GPU, Multi GPU or TPU')
+
+  args = parser.parse_args()
+  train_model(args.type, weight=None, epochs=20)

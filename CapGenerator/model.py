@@ -12,14 +12,14 @@ class Multi_Model:
   def predict(self, generator, num_samples, batch_size, verbose):
     # TPU requires a fixed batch size for all batches, therefore the number
     # of examples must be a multiple of the batch size, or else examples
-    # will get dropped. So we pad with fake examples which are ignored
-    # later on.
+    # will get dropped.
+    # So we pad with fake examples which are ignored later on.
     if self.type == 'tpu':
       steps = int(np.ceil(num_samples / batch_size))
       dummy_indices = steps * batch_size - num_samples
-      generator = tpu_gen(generator, dummy_indices)
+      generator = tpu_gen(generator, batch_size, dummy_indices)
       print('Steps: {}'.format(steps))
-      print('padding last batch with {} dummy samples'.format(dummy_indices))
+      print('Padding last batch with {} dummy samples'.format(dummy_indices))
       features = self.keras_model.predict(generator, batch_size, steps=steps, verbose=verbose)
       return features[:num_samples]
 
@@ -27,13 +27,13 @@ class Multi_Model:
       return self.keras_model.predict(generator, num_samples / batch_size, verbose=verbose)
 
 
-def tpu_gen(generator, dummy_indices):
-  dummyImage = np.zeros((224, 224), dtype=np.uint8)
-  for img in generator:
-    print(img.size)
-    yield img
-  for k in dummy_indices:
-    yield dummyImage
+def tpu_gen(generator, batch_size, dummy_indices):
+  dummyImages = np.zeros((dummy_indices, 224, 224, 3), dtype=np.uint8)
+  for imgs in generator:
+    if imgs.shape[0] == batch_size:
+      yield imgs
+    else:
+      yield np.concatenate((imgs, dummyImages), axis=0)
 
 
 def get_model(model, type, **kwargs):
@@ -52,10 +52,9 @@ def get_model(model, type, **kwargs):
                     kwargs['TPU_WORKER'])))
         model = Multi_Model(model, 'tpu')
 
-    # tf.Keras requires models to be compiled even for pre-trained weights
-    # (We just choose a random optimizer, doesn't affect prediction)
+
     model.keras_model.compile(
-        optimizer=tf.keras.optimizers.SGD(lr=0.0001, momentum=0.9),
+        optimizer=tf.keras.optimizers.Adam(lr=0.0001, momentum=0.9),
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 

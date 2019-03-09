@@ -86,7 +86,7 @@ def data_generator(descriptions, photos, tokenizer, max_length, n_step = 1):
           Ximages.append(in_img[k])
           XSeq.append(in_seq[k])
           y.append(out_word[k])
-      yield [[np.array(Ximages), np.array(XSeq)], np.array(y)]
+      yield ([np.array(Ximages), np.array(XSeq)], np.array(y))
 
 def categorical_crossentropy_from_logits(y_true, y_pred):
   y_true = y_true[:, :-1, :]  # Discard the last timestep

@@ -1,3 +1,4 @@
+import argparse
 import load_data as ld
 import generate_model as gen
 from tensorflow.keras.callbacks import ModelCheckpoint
@@ -44,7 +45,7 @@ def train_model(model_type, weight = None, epochs = 10, **kwargs):
   val_generator = gen.data_generator(test_descriptions, test_features, tokenizer, max_length)
 
   # fit model
-  model.fit_generator(train_generator, epochs=epochs, steps_per_epoch=steps,
+  model.fit(train_generator, epochs=epochs, steps_per_epoch=steps,
                       verbose=1, callbacks=[checkpoint], validation_data=val_generator,
                       validation_steps=val_steps)
 

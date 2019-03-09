@@ -16,8 +16,10 @@ class Multi_Model:
     # later on.
     if self.type == 'tpu':
       steps = int(np.ceil(num_samples / batch_size))
-      generator = tpu_gen(generator, steps * batch_size - num_samples)
+      dummy_indices = steps * batch_size - num_samples
+      generator = tpu_gen(generator, dummy_indices)
       print('Steps: {}'.format(steps))
+      print('padding last batch with {} dummy samples'.format(dummy_indices))
       features = self.keras_model.predict(generator, batch_size, steps=steps, verbose=verbose)
       return features[:num_samples]
 

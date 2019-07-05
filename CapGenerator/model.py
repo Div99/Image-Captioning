@@ -53,9 +53,11 @@ def get_model(model, type, **kwargs):
         #             kwargs['TPU_WORKER'])))
         model = Multi_Model(model, 'tpu')
 
-        strategy = tf.contrib.tpu.TPUDistributionStrategy(
-            tf.contrib.cluster_resolver.TPUClusterResolver(
-                kwargs['TPU_WORKER']))
+        cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(
+            tpu=kwargs['TPU_WORKER'])
+        tf.config.experimental_connect_to_host(cluster_resolver.master())
+        tf.tpu.experimental.initialize_tpu_system(cluster_resolver)
+        strategy = tf.distribute.experimental.TPUStrategy(cluster_resolver)
 
     with strategy.scope():
         model.keras_model.compile(
